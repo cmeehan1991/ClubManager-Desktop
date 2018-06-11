@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.StackedBarChart?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cbmwebdevelopment.dashboard.DashboardController">
+   <children>
+      <LineChart fx:id="tennisOccupancyLineChart" layoutX="14.0" layoutY="14.0" prefHeight="250.0" prefWidth="385.5" title="Tennis Occupancy" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+      <LineChart fx:id="poolOccupancyLineChart" layoutX="400.0" layoutY="14.0" prefHeight="250.0" prefWidth="385.5" title="Pool Occupancy" AnchorPane.leftAnchor="400.0" AnchorPane.topAnchor="14.0">
+         <xAxis>
+            <CategoryAxis side="BOTTOM" />
+         </xAxis>
+         <yAxis>
+            <NumberAxis side="LEFT" />
+         </yAxis>
+      </LineChart>
+      <StackedBarChart fx:id="poolChemicalsStackedBarChart" layoutX="286.0" layoutY="257.0" prefHeight="250.0" prefWidth="386.0" title="Chemicals" AnchorPane.leftAnchor="400.0" AnchorPane.topAnchor="257.0">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </StackedBarChart>
+      <TabPane layoutX="14.0" layoutY="257.0" prefHeight="250.0" prefWidth="386.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="Outdoor">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="outdoorCourtsUsageTableView" layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="358.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="Court" />
+                            <TableColumn prefWidth="190.0" text="Player(s)" />
+                              <TableColumn prefWidth="93.0" text="Time On" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Indoor">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="indoorCourtsUsageTableView" layoutY="9.0" prefHeight="200.0" prefWidth="386.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                          <columns>
+                              <TableColumn prefWidth="75.0" text="Court" />
+                              <TableColumn prefWidth="113.0" text="Player(s)" />
+                              <TableColumn prefWidth="169.0" text="Time On" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
