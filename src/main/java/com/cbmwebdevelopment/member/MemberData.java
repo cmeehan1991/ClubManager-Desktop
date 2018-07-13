@@ -6,6 +6,7 @@
 package com.cbmwebdevelopment.member;
 
 import com.cbmwebdevelopment.connections.DBConnection;
+import com.cbmwebdevelopment.tablecontrollers.MemberCheckInTableController.MemberCheckInInfo;
 import com.cbmwebdevelopment.tablecontrollers.MemberGroupTableController.MemberGroup;
 import com.cbmwebdevelopment.tablecontrollers.MemberSearchTableController.MemberSearch;
 import java.io.File;
@@ -20,17 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.controlsfx.control.PrefixSelectionComboBox;
 
 /**
  *
@@ -392,12 +386,57 @@ public class MemberData {
                     list.add(rs.getString("NAME"));
                 } while (rs.next());
             }
-
+            ps.close();
+            conn.close();
         } catch (SQLException ex) {
             System.out.println("Error retrieving member list: " + ex.getMessage());
         }
 
         return list;
+    }
+    
+    /**
+     * Returns an observable list to popoulate the member check in information 
+     * table view.
+     * @param terms
+     * @return 
+     */
+    public ObservableList<MemberCheckInInfo> getMemberCheckInInfo(String terms){
+        ObservableList<MemberCheckInInfo> data = FXCollections.observableArrayList();
+        String sql = "SELECT ID, SURNAME, NAME, MEMBERSHIP_ID FROM MEMBER_INFORMATION";
+        if (terms != null) {
+            sql += " ";
+            sql += "WHERE ID = ? OR NAME = ? OR SURNAME = ? OR MEMBERSHIP_ID = ? OR ID LIKE ? OR NAME LIKE ? OR SURNAME LIKE ? OR MEMBERSHIP_ID LIKE ?";
+        }
+        try {
+            Connection conn = new DBConnection().connect();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            if (terms != null) {
+                ps.setString(1, terms);
+                ps.setString(2, terms);
+                ps.setString(3, terms);
+                ps.setString(4, terms);
+                ps.setString(5, "%" + terms + "%");
+                ps.setString(6, "%" + terms + "%");
+                ps.setString(7, "%" + terms + "%");
+                ps.setString(8, "%" + terms + "%");
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                do {
+                    Integer id = rs.getInt("ID");
+                    String surname = rs.getString("SURNAME");
+                    String name = rs.getString("NAME");
+                    Integer membershipId = rs.getInt("MEMBERSHIP_ID");
+                    data.add(new MemberCheckInInfo(id, surname, name, membershipId));
+                } while (rs.next());
+            }
+            ps.close();
+            conn.close();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return data;
     }
    
 }

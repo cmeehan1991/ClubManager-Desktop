@@ -7,7 +7,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -16,11 +15,7 @@
 
 <BorderPane stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cbmwebdevelopment.clubmanager.FXMLController">
    <center>
-      <AnchorPane prefWidth="800.0">
-         <children>
-            <ScrollPane fx:id="primaryScrollPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-         </children>
-      </AnchorPane>
+      <ScrollPane fx:id="primaryScrollPane" prefHeight="632.0" prefWidth="800.0" />
    </center>
    <left>
       <VBox styleClass="primaryNavigationPane">
@@ -132,7 +127,7 @@
                            </padding>
                         </Button>
                         <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="181.0" styleClass="navigationSectionLabel" text="Pool" />
-                        <Button fx:id="poolOccupancyButton" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="36.0" styleClass="primaryNavigationPane__button" text="Occupancy">
+                        <Button fx:id="poolOccupancyButton" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" onAction="#poolOccupancyAction" prefHeight="36.0" styleClass="primaryNavigationPane__button" text="Occupancy">
                            <VBox.margin>
                               <Insets />
                            </VBox.margin>
@@ -140,7 +135,7 @@
                               <Insets left="25.0" />
                            </padding>
                         </Button>
-                        <Button fx:id="poolChemicalsButton" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="36.0" styleClass="primaryNavigationPane__button" text="Chemicals">
+                        <Button fx:id="poolChemicalsButton" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" onAction="#displayPoolChemicalsAction" prefHeight="36.0" styleClass="primaryNavigationPane__button" text="Chemicals">
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>

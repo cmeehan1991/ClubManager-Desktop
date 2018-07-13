@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.calendarfx.view.TimeField?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import org.controlsfx.control.CheckComboBox?>
+<?import org.controlsfx.control.PrefixSelectionComboBox?>
+
+<AnchorPane id="AnchorPane" prefHeight="554.0" prefWidth="281.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cbmwebdevelopment.pool.chemicals.ChemicalsEntryController">
+   <children>
+      <GridPane hgap="5.0" prefHeight="554.0" prefWidth="300.0" vgap="5.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="10.0" prefWidth="80.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="8.0" prefWidth="80.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label prefHeight="17.0" prefWidth="119.0" text="ID" />
+            <Label fx:id="idLabel" prefHeight="17.0" prefWidth="110.0" text="..." GridPane.columnIndex="1" />
+            <Label prefHeight="17.0" prefWidth="119.0" text="Facility" GridPane.rowIndex="1" />
+            <Label prefHeight="17.0" prefWidth="118.0" text="Time" GridPane.rowIndex="2" />
+            <Label prefHeight="17.0" prefWidth="118.0" text="Chlorine" GridPane.rowIndex="3" />
+            <Label prefHeight="17.0" prefWidth="100.0" text="pH" GridPane.rowIndex="4" />
+            <Label prefHeight="17.0" prefWidth="100.0" text="Calcium" GridPane.rowIndex="5" />
+            <Label prefHeight="17.0" prefWidth="100.0" text="Alkalinity" GridPane.rowIndex="6" />
+            <Label prefHeight="17.0" prefWidth="80.0" text="Air Temp." GridPane.rowIndex="7" />
+            <Label prefHeight="17.0" prefWidth="82.0" text="Water Temp." GridPane.rowIndex="8" />
+            <Label prefHeight="17.0" prefWidth="100.0" text="Weather" GridPane.rowIndex="9" />
+            <Label prefHeight="17.0" prefWidth="100.0" text="Bather Load" GridPane.rowIndex="10" />
+            <Label text="Notes" GridPane.rowIndex="11" />
+            <PrefixSelectionComboBox fx:id="facilityComboBox" prefHeight="27.0" prefWidth="180.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+            <TimeField fx:id="timeField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="chlorineTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <TextField fx:id="phTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="calciumTextField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <TextField fx:id="alkalinityTextField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <TextField fx:id="airTempTextField" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+            <TextField fx:id="waterTempTextField" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+            <CheckComboBox fx:id="weatherCheckComboBox" prefHeight="27.0" prefWidth="205.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="9" />
+            <TextField fx:id="batherLoadTextField" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+            <TextArea fx:id="notesTextArea" prefHeight="150.0" prefWidth="247.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="11" GridPane.rowSpan="2" />
+            <Button fx:id="saveEntryButton" defaultButton="true" mnemonicParsing="false" prefHeight="34.0" prefWidth="260.0" styleClass="primary-button" stylesheets="@../styles/Styles.css" text="Save" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="13" />
+            <Button fx:id="deleteEntryButton" mnemonicParsing="false" prefHeight="46.0" prefWidth="250.0" stylesheets="@../styles/Styles.css" text="Delete" GridPane.columnSpan="3" GridPane.rowIndex="14">
+               <styleClass>
+                  <String fx:value="primary-button" />
+                  <String fx:value="destructive" />
+               </styleClass>
+            </Button>
+         </children>
+      </GridPane>
+      <ProgressIndicator fx:id="progressIndicator" prefHeight="46.0" prefWidth="46.0" progress="0.0" visible="false" AnchorPane.bottomAnchor="254.0" AnchorPane.leftAnchor="110.5" AnchorPane.rightAnchor="110.5" AnchorPane.topAnchor="254.0" />
+   </children>
+</AnchorPane>

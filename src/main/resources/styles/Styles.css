@@ -15,6 +15,25 @@ AnchorPane{
     -fx-font-family: 'Arial' sans-serif;
 }
 
+.primary-button{
+    -fx-background-color:transparent;
+    -fx-text-field: #000000;
+    -fx-font-size:16px;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-border-color: #000000;
+}
+
+.destructive{
+    -fx-text-fill: #ff0000;
+    -fx-border-color: #ff0000;
+}
+
+.primary-button:hover{
+    -fx-background-color:#dddddd;
+    -fx-cursor: hand;
+}
+
 .primaryNavigationPane__button{
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
@@ -67,4 +86,45 @@ AnchorPane{
 
 .secondaryNavigation_button:hover{
     -fx-cursor: hand;
+}
+
+.logo-box{
+    -fx-background-color:#1abc9c;
+}
+
+.logo-box label.heading-label{
+    font-size: 24px;
+}
+
+.signInPane{
+    -fx-background-color:#ffffff;
+}
+
+.required{
+    -fx-border-color:red;
+}
+
+.loading-indicator, ProgressIndicator{
+    -fx-background-color:rgba(0,0,0,0.75);
+    -fx-background-insets: -10px;
+    -fx-background-radius: 5px;
+    -fx-progress-color: #ffffff;
+}
+
+.poolChemicalsNavigation Button{
+    -fx-background-color: #5F6C7A;
+}
+
+.poolChemicalsNavigation Button.active{
+    -fx-background-color: #c6ccd2;
+}
+
+
+
+.poolChemicalDataTableView .table-row:nth-child(even){
+    -fx-background-color:#dddddd;
+}
+
+.poolChemicalDataTableView .table-row:nth-cild(odd){
+    -fx-background-color:#ffffff;
 }

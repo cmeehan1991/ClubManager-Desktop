@@ -24,7 +24,7 @@ public class MemberMain extends Application {
     
     @Override
     public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MemberFXML.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MemberInformationFXML.fxml"));
         AnchorPane anchorPane = (AnchorPane) loader.load();
         
         MemberController memberController = loader.getController();        

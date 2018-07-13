@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="anchorPane" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cbmwebdevelopment.pool.chemicals.PoolChemicalDataFXMLController">
+   <children>
+      <HBox alignment="CENTER" minHeight="-Infinity" prefHeight="40.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label prefHeight="27.0" prefWidth="41.0" text="Date">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+            <DatePicker fx:id="datePicker">
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </DatePicker>
+            <ComboBox fx:id="facilityComboBox" prefWidth="150.0" />
+            <Separator orientation="VERTICAL" prefHeight="200.0">
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Separator>
+            <Button fx:id="viewEntryButton" mnemonicParsing="false" text="View Entry">
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="addEntryButton" mnemonicParsing="false" text="Add Entry" />
+         </children>
+      </HBox>
+      <TableView fx:id="chemicalDataTableView" prefHeight="560.0" prefWidth="800.0" styleClass="poolChemicalDataTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+        <columns>
+            <TableColumn prefWidth="75.0" text="Time" />
+          <TableColumn prefWidth="75.0" text="Chlorine" />
+          <TableColumn prefWidth="75.0" text="pH" />
+            <TableColumn prefWidth="75.0" text="Calcium" />
+            <TableColumn prefWidth="75.0" text="Alkalinity" />
+            <TableColumn prefWidth="193.0" text="Environment">
+               <columns>
+                  <TableColumn prefWidth="75.0" text="Air Temp" />
+                  <TableColumn prefWidth="75.0" text="Water Temp" />
+                  <TableColumn prefWidth="75.0" text="Weather" />
+               </columns>
+            </TableColumn>
+            <TableColumn prefWidth="90.0" text="Bather Load" />
+        </columns>
+      </TableView>
+      <ProgressIndicator fx:id="progressIndicator" progress="0.0" visible="false" AnchorPane.bottomAnchor="277.0" AnchorPane.leftAnchor="383.5" AnchorPane.rightAnchor="383.5" AnchorPane.topAnchor="277.0" />
+   </children>
+</AnchorPane>
