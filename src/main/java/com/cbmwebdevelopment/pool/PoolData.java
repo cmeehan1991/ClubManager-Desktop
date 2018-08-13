@@ -6,9 +6,17 @@
 package com.cbmwebdevelopment.pool;
 
 import com.cbmwebdevelopment.connections.DBConnection;
+import com.cbmwebdevelopment.connections.Links;
 import com.cbmwebdevelopment.tablecontrollers.ChemicalDataTableController.Chemicals;
 import com.cbmwebdevelopment.tablecontrollers.PoolOccupancyTableController.PoolOccupancy;
 import com.mysql.cj.api.jdbc.Statement;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,12 +27,14 @@ import java.util.Date;
 import java.util.HashMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
  * @author cmeehan
  */
-public class PoolData {
+public class PoolData implements Links {
 
     /**
      * Checks a member or guest into the pool. Returns a boolean based on
@@ -38,22 +48,36 @@ public class PoolData {
      */
     public boolean checkMemberIn(String membershipId, String memberId, String guestId, String date) {
         boolean success = false;
-        String sql = "INSERT INTO POOL_OCCUPANCY(MEMBERSHIP_ID, MEMBER_ID, GUEST_ID, TIME_IN) VALUES(?,?,?,?)";
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, membershipId);
-            ps.setString(2, memberId);
-            ps.setString(3, guestId);
-            ps.setString(4, date);
-            int rs = ps.executeUpdate();
-            if (rs > 0) {
-                success = true;
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+            String data = URLEncoder.encode("action", "UTF-8") + "=" + URLEncoder.encode("checkMemberIn", "UTF-8");
+            data += "&" + URLEncoder.encode("membership_id", "UTF-8") + "=" + URLEncoder.encode(membershipId, "UTF-8");
+            data += "&" + URLEncoder.encode("member_id", "UTF-8") + "=" + URLEncoder.encode(memberId, "UTF-8");
+            data += "&" + URLEncoder.encode("guest_id", "UTF-8") + "=" + URLEncoder.encode(guestId, "UTF-8");
+            data += "&" + URLEncoder.encode("date", "UTF-8") + "=" + URLEncoder.encode(date, "UTF-8");
+
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(data);
+            wr.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                break;
             }
-            System.out.println("Success: " + success);
-        } catch (SQLException ex) {
-            System.out.println("Error checking member in: " + ex.getMessage());
+            reader.close();
+
+            JSONObject jsonObj = new JSONObject(sb.toString());
+            success = jsonObj.getBoolean("SUCCESS");
+
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
+
         return success;
     }
 
@@ -61,28 +85,37 @@ public class PoolData {
      * Check the member or guest out. returns a boolean value based on the
      * success of the update.
      *
-     * @param membershipId
-     * @param memberId
-     * @param guestId
-     * @param dateIn
+     * @param id
      * @param dateOut
      * @return
      */
     public boolean checkMemberOut(String id, String dateOut) {
-        System.out.println("checkMemberOut");
         boolean success = false;
         String sql = "UPDATE POOL_OCCUPANCY SET TIME_OUT = ? WHERE ID = ?";
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, dateOut);
-            ps.setString(2, id);
-            int rs = ps.executeUpdate();
-            System.out.println(rs);
-            if (rs > 0) {
-                success = true;
-            }
-        } catch (SQLException ex) {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("check_member_out", ENCODING);
+            data += "&" + URLEncoder.encode("id", ENCODING) + "=" + URLEncoder.encode(id, ENCODING);
+            data += "&" + URLEncoder.encode("out", ENCODING) + "=" + URLEncoder.encode(dateOut, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line = reader.readLine();
+
+            JSONObject jsonObj = new JSONObject(line);
+            success = jsonObj.getBoolean("success");
+
+            writer.close();
+            reader.close();
+
+        } catch (IOException ex) {
             System.out.println("Error checking member out: " + ex.getMessage());
         }
         return success;
@@ -99,79 +132,65 @@ public class PoolData {
     public ObservableList<PoolOccupancy> getOccupants(String terms, String date) {
         ObservableList<PoolOccupancy> data = FXCollections.observableArrayList();
 
-        String sql = "SELECT POOL_OCCUPANCY.ID, POOL_OCCUPANCY.MEMBERSHIP_ID, POOL_OCCUPANCY.MEMBER_ID AS 'MEMBER_ID', POOL_OCCUPANCY.GUEST_ID, DATE_FORMAT(POOL_OCCUPANCY.TIME_IN, '%l:%i %p') AS 'TIME_IN' , DATE_FORMAT(POOL_OCCUPANCY.TIME_OUT, '%l:%i %p') AS 'TIME_OUT', MEMBER_INFORMATION.SURNAME, MEMBER_INFORMATION.NAME, GUEST_INFORMATION.SURNAME, GUEST_INFORMATION.NAME, IF(POOL_OCCUPANCY.GUEST_ID != NULL, true, false) AS 'IS_GUEST' "
-                + "FROM POOL_OCCUPANCY "
-                + "INNER JOIN MEMBER_INFORMATION ON POOL_OCCUPANCY.MEMBER_ID = MEMBER_INFORMATION.ID "
-                + "LEFT JOIN GUEST_INFORMATION ON POOL_OCCUPANCY.GUEST_ID = GUEST_INFORMATION.ID "
-                + "WHERE DATE_FORMAT(TIME_IN, '%Y-%m-%d') = DATE_FORMAT(?, '%Y-%m-%d')";
-
-        if (terms != null) {
-            sql += " " + "AND (MEMBER_INFORMATION.NAME = ? OR MEMBER_INFORMATION.SURNAME = ? OR MEMBER_INFORMATION.ID = ? OR MEMBER_INFORMATION.MEMBERSHIP_ID = ? OR MEMBER_INFORMATION.NAME LIKE ? OR MEMBER_INFORMATION.SURNAME LIKE ? OR MEMBER_INFORMATION.ID LIKE ? OR MEMBER_INFORMATION.MEMBERSHIP_ID LIKE ? OR GUEST_INFORMATION.NAME = ? OR GUEST_INFORMATION.SURNAME = ? OR GUEST_INFORMATION.ID = ? OR GUEST_INFORMATION.NAME LIKE ? OR GUEST_INFORMATION.SURNAME LIKE ? OR GUEST_INFORMATION.ID LIKE ?)";
-        }
-
-        sql += " " + "ORDER BY DATE_FORMAT(POOL_OCCUPANCY.TIME_IN, '%r') DESC";
-
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, date);
-            if (terms != null) {
-                ps.setString(2, terms);
-                ps.setString(3, terms);
-                ps.setString(4, terms);
-                ps.setString(5, terms);
-                ps.setString(6, "%" + terms + "%");
-                ps.setString(7, "%" + terms + "%");
-                ps.setString(8, "%" + terms + "%");
-                ps.setString(9, "%" + terms + "%");
-                ps.setString(10, terms);
-                ps.setString(11, terms);
-                ps.setString(12, terms);
-                ps.setString(13, "%" + terms + "%");
-                ps.setString(14, "%" + terms + "%");
-                ps.setString(15, "%" + terms + "%");
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String urlData = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_occupants", ENCODING);
+            urlData += "&" + URLEncoder.encode("terms", ENCODING) + "=" + URLEncoder.encode(terms, ENCODING);
+            urlData += "&" + URLEncoder.encode("date", ENCODING) + "=" + URLEncoder.encode(date, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(urlData);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            JSONArray jsonArr = new JSONArray(reader.readLine());
+
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject jsonObj = jsonArr.getJSONObject(i);
+
+                Integer id = Integer.parseInt((String) jsonObj.get("ID"));
+                Integer memberId = Integer.parseInt((String) jsonObj.get("MEMBER_ID"));
+                String surname = String.valueOf(jsonObj.get("SURNAME"));
+
+                String name = String.valueOf(jsonObj.get("NAME"));
+                Integer membershipId = Integer.parseInt(jsonObj.getString("MEMBERSHIP_ID"));
+                String timeIn = String.valueOf(jsonObj.get("TIME_IN"));
+                String timeOut = String.valueOf(jsonObj.get("TIME_OUT"));
+                Boolean isGuest = Boolean.parseBoolean((String) jsonObj.get("IS_GUEST"));
+
+                data.add(new PoolOccupancy(id, memberId, surname, name, membershipId, timeIn, timeOut, isGuest));
             }
-            System.out.println(ps);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                do {
-                    Integer id = rs.getInt("ID");
-                    Integer memberId = rs.getInt("MEMBER_ID");
-                    String surname = rs.getString("SURNAME");
-                    String name = rs.getString("NAME");
-                    Integer membershipId = rs.getInt("MEMBERSHIP_ID");
-                    String timeIn = rs.getString("TIME_IN");
-                    String timeOut = rs.getString("TIME_OUT");
-                    Boolean isGuest = rs.getBoolean("IS_GUEST");
-                    data.add(new PoolOccupancy(id, memberId, surname, name, membershipId, timeIn, timeOut, isGuest));
-                } while (rs.next());
-            }
-        } catch (SQLException ex) {
+        } catch (IOException ex) {
             System.out.println("Error getting data: " + ex.getMessage());
             System.out.println(Arrays.toString(ex.getStackTrace()));
         }
+
         return data;
     }
 
     public HashMap<String, Double> getOccupancy() {
         HashMap<String, Double> results = new HashMap<>();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String today = format.format(new Date());
-        String sql = "SELECT COUNT(ID) AS 'TOTAL', DATE_FORMAT(TIME_ON, '%l %p') AS 'TIME' FROM POOL_OCCUPANCY WHERE TIME_ON = ? GROUP BY TIME_ON ORDER BY TIME_ON ASC;";
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, today);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                do {
-                    String time = rs.getString("TIME");
-                    Double count = rs.getDouble("TOTAL");
-                    results.put(time, count);
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
 
-                } while (rs.next());
+            String urlData = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_occupancy");
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(urlData);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            JSONArray jsonArr = new JSONArray(reader.readLine());
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject jsonObj = jsonArr.getJSONObject(i);
+                results.put(jsonObj.getString("TIME"), jsonObj.getDouble("TOTAL"));
             }
-        } catch (SQLException ex) {
+        } catch (IOException ex) {
             System.out.println("Error getting occupancy: " + ex.getMessage());
         }
         return results;
@@ -181,23 +200,32 @@ public class PoolData {
         HashMap<String, Double> results = new HashMap<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String today = format.format(date);
-        /* String sql = "SELECT PH, DATE_FORMAT(TIME_ON, '%l:%i %p') AS 'TIME' FROM POOL_OCCUPANCY WHERE TIME_ON = ? GROUP BY TIME_ON ORDER BY TIME_ON ASC;";
-        try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, today);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                do {
-                    String time = rs.getString("TIME");
-                    Double count = rs.getDouble("PH");
-                    results.put(time, count);
 
-                } while (rs.next());
+        try {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_chlorine", ENCODING);
+            data += "&" + URLEncoder.encode("date", ENCODING) + "=" + URLEncoder.encode(today, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            JSONArray jsonArr = new JSONArray(reader.readLine());
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject jsonObject = jsonArr.getJSONObject(i);
+                results.put(jsonObject.getString("TIME"), jsonObject.getDouble("CHLORINE"));
             }
-        } catch (SQLException ex) {
-            System.out.println("Error getting Chlroine: " + ex.getMessage());
-        }*/
+
+            writer.close();
+            reader.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
         return results;
     }
 
@@ -205,54 +233,110 @@ public class PoolData {
         HashMap<String, Double> results = new HashMap<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String today = format.format(date);
-        String sql = "SELECT CHLORINE, DATE_FORMAT(TIME_ON, '%l:%i %p') AS 'TIME' FROM POOL_OCCUPANCY WHERE TIME_ON = ? GROUP BY TIME_ON ORDER BY TIME_ON ASC;";
-        try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, today);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                do {
-                    String time = rs.getString("TIME");
-                    Double count = rs.getDouble("PH");
-                    results.put(time, count);
 
-                } while (rs.next());
+        try {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_ph", ENCODING);
+            data += "&" + URLEncoder.encode("date", ENCODING) + "=" + URLEncoder.encode(today, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            JSONArray jsonArr = new JSONArray(reader.readLine());
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject jsonObject = jsonArr.getJSONObject(i);
+                results.put(jsonObject.getString("TIME"), jsonObject.getDouble("PH"));
             }
-        } catch (SQLException ex) {
-            System.out.println("Error getting occupancy: " + ex.getMessage());
+
+            writer.close();
+            reader.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
         return results;
     }
 
+    /**
+     * Get the pool chemicals to populate the pool chemical data table Based on
+     * date and facility selected
+     *
+     * @param date
+     * @param facility
+     * @return
+     */
     public ObservableList<Chemicals> getPoolChemicalData(String date, String facility) {
-        ObservableList<Chemicals> data = FXCollections.observableArrayList();
-        String sql = "SELECT ID, CHLORINE, PH, ALKALINITY, CALCIUM, WATER_TEMP, AIR_TEMP, BATHER_LOAD, WEATHER, DATE_FORMAT(DATE_CHECKED, '%h:%i') as 'DATE_CHECKED' FROM POOL_CHEMICALS WHERE DATE_FORMAT(DATE_CHECKED, '%Y-%m-%d') = ? AND FACILITY = ?";
+        ObservableList<Chemicals> results = FXCollections.observableArrayList();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String today = format.format(date);
 
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, date);
-            ps.setString(2, facility);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                do {
-                    int id = rs.getInt("ID");
-                    String time = rs.getString("DATE_CHECKED");
-                    double chlorine = rs.getDouble("CHLORINE");
-                    double ph = rs.getDouble("PH");
-                    double calcium = rs.getDouble("CALCIUM");
-                    double airTemp = rs.getDouble("AIR_TEMP");
-                    double waterTemp = rs.getDouble("WATER_TEMP");
-                    String weather = rs.getString("WEATHER");
-                    double batherLoad = rs.getDouble("BATHER_LOAD");
-                    data.add(new Chemicals(id, time, chlorine, ph, calcium, airTemp, waterTemp, weather, batherLoad));
-                } while (rs.next());
-            }
-        } catch (SQLException ex) {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
 
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_ph", ENCODING);
+            data += "&" + URLEncoder.encode("date", ENCODING) + "=" + URLEncoder.encode(today, ENCODING);
+            data += "&" + URLEncoder.encode("facility", ENCODING) + "=" + URLEncoder.encode(facility, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            JSONArray jsonArr = new JSONArray(reader.readLine());
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject jsonObject = jsonArr.getJSONObject(i);
+
+                //int id, String time, double chlorine, double ph, double calcium, double airTemp, double waterTemp, String weather, double batherLoad
+                results.add(new Chemicals(jsonObject.getInt("ID"), jsonObject.getString("DATE_CHECKED"), jsonObject.getDouble("CHLORINE"), jsonObject.getDouble("PH"), jsonObject.getDouble("CALCIUM"), jsonObject.getDouble("ALKALINITY"), jsonObject.getDouble("WATER_TEMP"), jsonObject.getDouble("AIR_TEMP"), jsonObject.getString("WEATHER"), jsonObject.getDouble("BATHER_LOAD")));
+
+            }
+            writer.close();
+            reader.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
-        return data;
+        return results;
+    }
+
+    /**
+     * Delete the entry from the pool chemicals table
+     *
+     * @param id
+     * @return
+     */
+    public boolean removeEntry(String id) {
+        boolean removed = false;
+        try {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("remove_entry", ENCODING);
+            data += "&" + URLEncoder.encode("id", ENCODING) + "=" + URLEncoder.encode(id, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            JSONObject jsonObj = new JSONObject(reader.readLine());
+
+            removed = jsonObj.getBoolean("SUCCESS");
+            writer.close();
+            reader.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return removed;
     }
 
     /**
@@ -262,33 +346,46 @@ public class PoolData {
      * @return
      */
     public HashMap<String, String> getEntry(String id) {
-        HashMap<String, String> data = new HashMap<>();
-        String sql = "SELECT CHLORINE, PH, ALKALINITY, CALCIUM, WATER_TEMP, AIR_TEMP, BATHER_LOAD, WEATHER, DATE_FORMAT(DATE_CHECKED, '%h:%i') as 'TIME_CHECKED', NOTES FROM POOL_CHEMICALS WHERE ID = ?";
+        HashMap<String, String> results = new HashMap<>();
+
         try {
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                data.put("CHLORINE", rs.getString("CHLORINE"));
-                data.put("PH", rs.getString("PH"));
-                data.put("ALKALINITY", rs.getString("ALKALINITY"));
-                data.put("CALCIUM", rs.getString("CALCIUM"));
-                data.put("WATER_TEMP", rs.getString("WATER_TEMP"));
-                data.put("AIR_TEMP", rs.getString("AIR_TEMP"));
-                data.put("BATHER_LOAD", rs.getString("BATHER_LOAD"));
-                data.put("WEATHER", rs.getString("WEATHER"));
-                data.put("TIME_CHECKED", rs.getString("TIME_CHECKED"));
-                data.put("NOTES", rs.getString("NOTES"));
-            }
-        } catch (SQLException ex) {
+            URL url = new URL(POOL_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+
+            String data = URLEncoder.encode("action", ENCODING) + "=" + URLEncoder.encode("get_entry", ENCODING);
+            data += "&" + URLEncoder.encode("id", ENCODING) + "=" + URLEncoder.encode(id, ENCODING);
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            JSONObject jsonObj = new JSONObject(reader.readLine());
+
+            results.put("CHLORINE", jsonObj.getString("CHLORINE"));
+            results.put("PH", jsonObj.getString("PH"));
+            results.put("ALKALINITY", jsonObj.getString("ALKALINITY"));
+            results.put("CALCIUM", jsonObj.getString("CALCIUM"));
+            results.put("WATER_TEMP", jsonObj.getString("WATER_TEMP"));
+            results.put("AIR_TEMP", jsonObj.getString("AIR_TEMP"));
+            results.put("BATHER_LOAD", jsonObj.getString("BATHER_LOAD"));
+            results.put("WEATHER", jsonObj.getString("WEATHER"));
+            results.put("TIME_CHECKED", jsonObj.getString("TIME_CHECKED"));
+            results.put("FACILITY", jsonObj.getString("FACILITY"));
+            results.put("NOTES", jsonObj.getString("NOTES"));
+
+            writer.close();
+            reader.close();
+        } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
-        return data;
+        return results;
     }
 
     /**
      * Add a new entry and return the generated key as the unique ID
+     *
      * @param dateTimeChecked
      * @param time
      * @param chlorine
@@ -301,7 +398,7 @@ public class PoolData {
      * @param batherLoad
      * @param notes
      * @param facility
-     * @return 
+     * @return
      */
     public String addNewEntry(String dateTimeChecked, String chlorine, String ph, String calcium, String alkalinity, String airTemp, String waterTemp, String weather, String batherLoad, String notes, String facility) {
         String id = null;
@@ -320,13 +417,15 @@ public class PoolData {
             ps.setString(9, dateTimeChecked);
             ps.setString(10, notes);
             ps.setString(11, facility);
-            ps.execute();
+            ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
-            id = String.valueOf(rs.getInt(1));
+            if (rs.next()) {
+                id = String.valueOf(rs.getInt(1));
+            }
             ps.close();
             conn.close();
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            System.out.println("Error adding new entry: " + ex.getMessage());
         }
         return id;
     }

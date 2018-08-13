@@ -21,7 +21,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -63,6 +62,7 @@ public class PoolChemicalDataFXMLController implements Initializable {
     private void initFields() {
         tableController = new ChemicalDataTableController();
         facilityComboBox.getItems().setAll("Main Pool", "Wading Pool");
+        facilityComboBox.getSelectionModel().select(0);
         datePicker.setValue(LocalDate.now());
     }
 
@@ -107,6 +107,14 @@ public class PoolChemicalDataFXMLController implements Initializable {
         addEntryButton.setOnAction(evt -> {
             openEntryController(null);
         });
+        
+        facilityComboBox.valueProperty().addListener((obs, ov, nv)->{
+            setTableView();
+        });
+        
+        datePicker.valueProperty().addListener((obs, ov, nv)->{
+            setTableView();
+        });
     }
 
     private void openEntryController(String id) {
@@ -117,6 +125,8 @@ public class PoolChemicalDataFXMLController implements Initializable {
             controller.poolDataController = this;
             if (id != null) {
                 controller.getEntry(id);
+            }else{
+                controller.facilityComboBox.getSelectionModel().select(facilityComboBox.getSelectionModel().getSelectedItem().toString());
             }
             Scene scene = new Scene(root);
 

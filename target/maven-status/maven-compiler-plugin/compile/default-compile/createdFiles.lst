@@ -23,6 +23,7 @@ com/cbmwebdevelopment/tennis/TennisReservationsMain$1.class
 com/cbmwebdevelopment/tablecontrollers/MemberGroupTableController$MemberGroup.class
 com/cbmwebdevelopment/tablecontrollers/MemberSearchTableController.class
 com/cbmwebdevelopment/member/MemberData.class
+com/cbmwebdevelopment/connections/Links.class
 com/cbmwebdevelopment/tablecontrollers/DashboardCourtTableController$CourtOccupancy.class
 com/cbmwebdevelopment/tablecontrollers/ChemicalDataTableController$Chemicals.class
 com/cbmwebdevelopment/signin/SignInMain$1.class

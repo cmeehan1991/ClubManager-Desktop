@@ -7,9 +7,7 @@ package com.cbmwebdevelopment.pool.chemicals;
 
 import com.calendarfx.view.TimeField;
 import com.cbmwebdevelopment.pool.PoolData;
-import com.cbmwebdevelopment.tablecontrollers.ChemicalDataTableController.Chemicals;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,8 +18,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -32,7 +28,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.PrefixSelectionComboBox;
 
 /**
@@ -55,10 +50,7 @@ public class ChemicalsEntryController implements Initializable {
     TextField chlorineTextField, phTextField, calciumTextField, alkalinityTextField, airTempTextField, waterTempTextField, batherLoadTextField;
 
     @FXML
-    CheckComboBox weatherCheckComboBox;
-
-    @FXML
-    PrefixSelectionComboBox facilityComboBox;
+    PrefixSelectionComboBox facilityComboBox, weatherComboBox;
 
     @FXML
     Button saveEntryButton, deleteEntryButton;
@@ -70,6 +62,11 @@ public class ChemicalsEntryController implements Initializable {
     public DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
 
+    /**
+     * Get the selected entry based on the entry ID
+     *
+     * @param id
+     */
     public void getEntry(String id) {
         progressIndicator.setVisible(true);
         progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -77,7 +74,6 @@ public class ChemicalsEntryController implements Initializable {
         executor.submit(() -> {
             PoolData poolData = new PoolData();
             HashMap<String, String> data = poolData.getEntry(id);
-            ObservableList<String> checkedWeather = FXCollections.observableArrayList(data.get("WEATHER").split(","));
             Platform.runLater(() -> {
                 idLabel.setText(id);
                 timeField.setValue(LocalTime.parse(data.get("TIME_CHECKED"), DateTimeFormatter.ISO_TIME));
@@ -87,7 +83,7 @@ public class ChemicalsEntryController implements Initializable {
                 alkalinityTextField.setText(data.get("ALKALINITY"));
                 airTempTextField.setText(data.get("AIR_TEMP"));
                 waterTempTextField.setText(data.get("WATER_TEMP"));
-                weatherCheckComboBox.getCheckModel().check(checkedWeather);
+                weatherComboBox.getSelectionModel().select(data.get("WEATHER"));
                 batherLoadTextField.setText(data.get("BATHER_LOAD"));
                 notesTextArea.setText(data.get("NOTES"));
                 facilityComboBox.getSelectionModel().select(data.get("FACILITY"));
@@ -98,6 +94,10 @@ public class ChemicalsEntryController implements Initializable {
         });
     }
 
+    /**
+     * Saves/updates the entry. If there is an ID associated with the entry,
+     * then we update the existing entry. Otherwise we are creating a new entry.
+     */
     public void saveEntry() {
         progressIndicator.setVisible(true);
         progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -105,54 +105,38 @@ public class ChemicalsEntryController implements Initializable {
         executor.submit(() -> {
             String id = idLabel.getText();
             boolean isNew = id.equals("...");
-            System.out.println(isNew);
+
             LocalDate date = poolDataController.datePicker.getValue();
             LocalTime time = timeField.getValue();
             String timeString = timeFormat.format(time);
             String dateTimeString = dateTimeFormat.format(LocalDateTime.of(date, time));
-            System.out.println(timeString);
-            System.out.println(dateTimeString);
             String chlorine = chlorineTextField.getText();
-            System.out.println(chlorine);
             String ph = phTextField.getText();
-            System.out.println(ph);
             String calcium = calciumTextField.getText();
-            System.out.println(calcium);
             String alkalinity = alkalinityTextField.getText();
-            System.out.println(alkalinity);
             String airTemp = airTempTextField.getText();
-            System.out.println(airTemp);
             String waterTemp = waterTempTextField.getText();
-            System.out.println(waterTemp);
-            String weather = weatherCheckComboBox.getCheckModel().getCheckedItems().toString();
-            System.out.println(weather);
+            String weather = String.valueOf(weatherComboBox.getSelectionModel().getSelectedItem());
             String batherLoad = batherLoadTextField.getText();
-            System.out.println(batherLoad);
             String notes = notesTextArea.getText();
-            System.out.println(notes);
             String facility = facilityComboBox.getSelectionModel().getSelectedItem().toString();
-            System.out.println(facility);
 
             PoolData poolData = new PoolData();
-            System.out.println("PoolData");
             if (isNew) {
-                System.out.println("Is new");
                 String newId = poolData.addNewEntry(dateTimeString, chlorine, ph, calcium, alkalinity, airTemp, waterTemp, weather, batherLoad, notes, facility);
-                
+                System.out.println(newId);
                 Platform.runLater(() -> {
                     progressIndicator.setVisible(false);
                     progressIndicator.setProgress(0.0);
                     idLabel.setText(newId);
-                    poolDataController.setTableView(); 
+                    poolDataController.setTableView();
                 });
             } else {
-                System.out.println("Not new");
                 boolean updated = poolData.updateEntry(id, dateTimeString, chlorine, ph, calcium, alkalinity, airTemp, waterTemp, weather, batherLoad, notes, facility);
-
                 Platform.runLater(() -> {
                     progressIndicator.setVisible(false);
                     progressIndicator.setProgress(0.0);
-                    poolDataController.setTableView();                   
+                    poolDataController.setTableView();
                 });
             }
             executor.shutdown();
@@ -160,14 +144,21 @@ public class ChemicalsEntryController implements Initializable {
     }
 
     private void initInputs() {
-        weatherCheckComboBox.getItems().setAll("Fog", "Overcast", "Rain", "Sun", "Wind");
+        weatherComboBox.getItems().setAll("Fog", "Overcast", "Rain", "Sun", "Wind");
         facilityComboBox.getItems().setAll("Main Pool", "Wading Pool");
     }
 
-    private void deleteEntry(){
-        
+    private void deleteEntry(String id) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.submit(() -> {
+            PoolData poolData = new PoolData();
+            boolean removed = poolData.removeEntry(id);
+            Platform.runLater(()->{
+                
+            });
+        });
     }
-    
+
     private void setActionListeners() {
         saveEntryButton.setOnAction(evt -> {
             saveEntry();
@@ -175,7 +166,7 @@ public class ChemicalsEntryController implements Initializable {
 
         deleteEntryButton.setOnAction(evt -> {
             if (confirmWithUser()) {
-                deleteEntry();
+                deleteEntry(idLabel.getText());
             }
         });
     }

@@ -31,6 +31,7 @@ public class MainApp extends Application {
         
         stage.setTitle("Club Manager");
         stage.setScene(scene);
+        scene.getWindow().centerOnScreen();
         stage.show();
         
         stage.setOnCloseRequest(event -> {

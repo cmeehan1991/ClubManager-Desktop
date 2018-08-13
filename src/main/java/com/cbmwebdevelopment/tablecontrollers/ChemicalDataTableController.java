@@ -74,10 +74,10 @@ public class ChemicalDataTableController {
     
     public static class Chemicals{
         final SimpleIntegerProperty id;
-        final SimpleDoubleProperty chlorine, ph, calcium, airTemp, waterTemp, batherLoad;
+        final SimpleDoubleProperty chlorine, ph, calcium, airTemp, waterTemp, batherLoad, alkalinity;
         final SimpleStringProperty time, weather;
         
-        public Chemicals(int id, String time, double chlorine, double ph, double calcium, double airTemp, double waterTemp, String weather, double batherLoad){
+        public Chemicals(int id, String time, double chlorine, double ph, double calcium, double alkalinity, double airTemp, double waterTemp, String weather, double batherLoad){
             this.id = new SimpleIntegerProperty(id);
             this.time = new SimpleStringProperty(time);
             this.chlorine = new SimpleDoubleProperty(chlorine);
@@ -87,6 +87,7 @@ public class ChemicalDataTableController {
             this.waterTemp = new SimpleDoubleProperty(waterTemp);
             this.weather = new SimpleStringProperty(weather);
             this.batherLoad = new SimpleDoubleProperty(batherLoad);
+            this.alkalinity = new SimpleDoubleProperty(alkalinity);
         }
         
         public void setId(int id){
@@ -119,6 +120,14 @@ public class ChemicalDataTableController {
         
         public void setPh(Double val){
             this.ph.set(val);
+        }
+        
+        public Double getAlkalinity(){
+            return this.alkalinity.get();
+        }
+        
+        public void setAlkalinity(Double val){
+            this.alkalinity.set(val);
         }
         
         public Double getCalcium(){

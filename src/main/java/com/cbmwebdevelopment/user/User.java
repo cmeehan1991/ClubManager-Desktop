@@ -5,17 +5,21 @@
  */
 package com.cbmwebdevelopment.user;
 
-import com.cbmwebdevelopment.connections.DBConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.cbmwebdevelopment.connections.Links;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import org.json.JSONObject;
 
 /**
  *
  * @author cmeehan
  */
-public class User {
+public class User implements Links{
     
     /**
      * Sign the user in. 
@@ -29,38 +33,60 @@ public class User {
      */
     public boolean signIn(String username, String password){
         boolean result = false;
-        String sql = "SELECT ID FROM EMPLOYEES WHERE USERNAME = ? AND PASSWORD = MD5(?)";
         try{
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
+            URL url = new URL(USERS_LINK);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+            
+            String data = URLEncoder.encode("action", "UTF-8") + "=" + URLEncoder.encode("sign_in", "UTF-8");
+            data += "&" + URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(username, "UTF-8");
+            data += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
+            
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(data);
+            writer.flush();
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            
+            JSONObject jsonObj = new JSONObject(reader.readLine());
+            
+            if(jsonObj.getBoolean("is_valid")){
                 result = true;
-                System.getProperties().put("USER_ID", rs.getString("ID"));
+                System.getProperties().put("USER_ID", jsonObj.getString("ID"));
             }
-            conn.close();
-        }catch(SQLException ex){
+        }catch(IOException ex){
             System.out.println(ex.getMessage());
         }
+        
         return result;
     }
     
     public String getUsername(String id){
-        String username = null;
-        String sql = "SELECT USERNAME FROM EMPLOYEES WHERE ID = ?";
-        try{
-            Connection conn = new DBConnection().connect();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, id);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                username = rs.getString("USERNAME");
-            }
-        }catch(SQLException ex){
-            System.out.println(ex.getMessage());
-        }
+       String username = null;
+       try{
+           URL url = new URL(USERS_LINK);
+           URLConnection conn = url.openConnection();
+           conn.setDoOutput(true);
+           
+           String data = URLEncoder.encode("action", "UTF-8") + "=" + URLEncoder.encode("get_username", "UTF-8");
+           data += "&" + URLEncoder.encode("id", ENCODING) + "=" + URLEncoder.encode(id, ENCODING);
+           System.out.println(data);
+           
+           OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+           writer.write(data);
+           writer.flush();
+           System.out.println(writer);
+           BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));         
+           System.out.println(reader);
+           JSONObject jsonObj = new JSONObject(reader.readLine());
+           System.out.println(jsonObj);
+           if(jsonObj.getBoolean("has_result")){
+               username = jsonObj.getString("USERNAME");
+           }
+           
+       }catch(IOException ex){
+           System.out.println(ex.getMessage());
+       }
         return username;
     }
 }

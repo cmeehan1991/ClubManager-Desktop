@@ -73,7 +73,7 @@ public class MemberController implements Initializable {
     ImageView profilePictureImageView;
 
     @FXML
-    TableView familyTableView;
+    TableView<MemberGroup> familyTableView;
 
     @FXML
     Button getMemberButton;
@@ -222,20 +222,24 @@ public class MemberController implements Initializable {
 
     @FXML
     protected void editFamilyAction(ActionEvent event) {
-
+        MemberGroup memberGroup = familyTableView.getSelectionModel().getSelectedItem();
+        if (memberGroup != null) {
+            getMemberInfo(String.valueOf(memberGroup.getId()));
+        }
     }
 
-    protected void getMembershipGroup(String id){
+    protected void getMembershipGroup(String id) {
         ExecutorService executor = Executors.newCachedThreadPool();
-        executor.submit(()->{
+        executor.submit(() -> {
             MemberData memberData = new MemberData();
             ObservableList<MemberGroup> data = memberData.getMemberGroup(id);
-            Platform.runLater(()->{
-               familyTableView.getItems().setAll(data);
-            });            
+            Platform.runLater(() -> {
+                familyTableView.getItems().setAll(data);
+            });
+            executor.shutdown();
         });
     }
-    
+
     @FXML
     protected void getMemberAction(ActionEvent event) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MemberSearchFXML.fxml"));
@@ -314,6 +318,7 @@ public class MemberController implements Initializable {
                 progressIndicator.setVisible(false);
                 progressIndicator.setProgress(0);
             });
+            executor.shutdown();
         });
     }
 
@@ -346,10 +351,11 @@ public class MemberController implements Initializable {
     private void initTableViews() {
         memberGroupTableController = new MemberGroupTableController();
         memberGroupTableController.tableController(familyTableView);
-        if(groupIdTextField != null && !groupIdTextField.getText().trim().isEmpty()){
+        if (groupIdTextField != null && !groupIdTextField.getText().trim().isEmpty()) {
             membershipId = groupIdTextField.getText();
             getMembershipGroup(membershipId);
         }
+        
     }
 
     protected void initInputs() {

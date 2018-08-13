@@ -106,6 +106,7 @@ public class UserSignInController implements Initializable {
 
             stage.setScene(scene);
             stage.setTitle("Club Manager");
+            scene.getWindow().centerOnScreen();
             stage.show();
 
             stage.setOnCloseRequest(evt -> {

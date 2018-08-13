@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import org.controlsfx.control.CheckComboBox?>
 <?import org.controlsfx.control.PrefixSelectionComboBox?>
 
 <AnchorPane id="AnchorPane" prefHeight="554.0" prefWidth="281.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cbmwebdevelopment.pool.chemicals.ChemicalsEntryController">
@@ -61,7 +60,7 @@
             <TextField fx:id="alkalinityTextField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <TextField fx:id="airTempTextField" GridPane.columnIndex="1" GridPane.rowIndex="7" />
             <TextField fx:id="waterTempTextField" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-            <CheckComboBox fx:id="weatherCheckComboBox" prefHeight="27.0" prefWidth="205.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="9" />
+            <PrefixSelectionComboBox fx:id="weatherComboBox" prefHeight="27.0" prefWidth="185.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="9" />
             <TextField fx:id="batherLoadTextField" GridPane.columnIndex="1" GridPane.rowIndex="10" />
             <TextArea fx:id="notesTextArea" prefHeight="150.0" prefWidth="247.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="11" GridPane.rowSpan="2" />
             <Button fx:id="saveEntryButton" defaultButton="true" mnemonicParsing="false" prefHeight="34.0" prefWidth="260.0" styleClass="primary-button" stylesheets="@../styles/Styles.css" text="Save" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="13" />
